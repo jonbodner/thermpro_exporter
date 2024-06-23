@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"strconv"
 	"strings"
 	mcsv "thermpro_exporter/internal/csv"
 	"time"
@@ -15,7 +16,22 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-const dateformat = `2006-01-02 15:04:05`
+/*
+Writing this helps me clarify my thoughts. I think I found the problem.
+Numbers keeps asking me to format the data and I think this is why.
+There is a format difference between Bodner generated data, and ThermPro generated data.
+The data fields are {date, temperature, humidity}.  Bodner formatted data:
+Saturday, June 15, 2024 00:00:00
+76.10
+58
+
+	ThermPro formatted data: 01-13-2024 0:00 AM
+
+65.3
+39
+I am trying to find a way to change the format using numbers.
+*/
+const dateformat = `01-02-2006 03:04 PM`
 
 func GenerateCSV(startDate time.Time, endDate time.Time, interval time.Duration) error {
 
@@ -100,6 +116,10 @@ order by timeInterval asc;
 		if err != nil {
 			return err
 		}
+		// convert from C to F
+		tempC, _ := strconv.ParseFloat(curData.Temperature, 64)
+		tempF := (tempC * 1.8) + 32
+		curData.Temperature = fmt.Sprintf("%.2f", tempF)
 		foundTime := time.UnixMilli(timestamp * 1000)
 		if !foundTime.Before(nextTime) {
 			curData.DateTime = foundTime.Format(dateformat)

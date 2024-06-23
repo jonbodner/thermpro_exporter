@@ -19,7 +19,6 @@ func main() {
 	label1 := widget.NewLabel("Start Date:")
 	start := widget.NewEntry()
 	start.SetPlaceHolder("YYYY-MM-DD")
-	fmt.Println(start.Size())
 	label2 := widget.NewLabel("End Date:")
 	end := widget.NewEntry()
 	end.SetPlaceHolder("YYYY-MM-DD")
